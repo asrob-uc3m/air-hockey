@@ -1,0 +1,5 @@
+Based on the one from the FreeCAD-library (https://github.com/FreeCAD/FreeCAD-library).
+
+* URL of the file: https://github.com/FreeCAD/FreeCAD-library/blob/master/Mechanical%20Parts/Pulleys/GT2Pulley.fcstd
+* Author: rcccort
+* Modifications by: David-Estevez
