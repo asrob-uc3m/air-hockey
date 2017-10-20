@@ -12,15 +12,35 @@ class GripPipeline:
         """initializes all values to presets or None if need to be set
         """
 
-        self.__hsv_threshold_hue = [0.0, 180.0]
-        self.__hsv_threshold_saturation = [0.0, 139.6843003412969]
-        self.__hsv_threshold_value = [0.0, 255.0]
+        self.__hsv_threshold_0_hue = [29.136690647482013, 152.35494880546074]
+        self.__hsv_threshold_0_saturation = [180.0, 255.0]
+        self.__hsv_threshold_0_value = [0.0, 255.0]
 
-        self.hsv_threshold_output = None
+        self.hsv_threshold_0_output = None
 
-        self.__cv_bitwise_not_src1 = self.hsv_threshold_output
 
-        self.cv_bitwise_not_output = None
+        self.__hsv_threshold_1_hue = [0.0, 180.0]
+        self.__hsv_threshold_1_saturation = [176.57374100719426, 255.0]
+        self.__hsv_threshold_1_value = [0.0, 255.0]
+
+        self.hsv_threshold_1_output = None
+
+        self.__cv_bitwise_xor_src1 = self.hsv_threshold_0_output
+        self.__cv_bitwise_xor_src2 = self.hsv_threshold_1_output
+
+        self.cv_bitwise_xor_output = None
+
+        self.__cv_medianblur_src = self.cv_bitwise_xor_output
+        self.__cv_medianblur_ksize = 3.0
+
+        self.cv_medianblur_output = None
+
+        self.__find_blobs_input = self.cv_medianblur_output
+        self.__find_blobs_min_area = 30.0
+        self.__find_blobs_circularity = [0.0, 1.0]
+        self.__find_blobs_dark_blobs = False
+
+        self.find_blobs_output = None
 
 
     def process(self, source0):
@@ -28,12 +48,25 @@ class GripPipeline:
         Runs the pipeline and sets all outputs to new values.
         """
         # Step HSV_Threshold0:
-        self.__hsv_threshold_input = source0
-        (self.hsv_threshold_output) = self.__hsv_threshold(self.__hsv_threshold_input, self.__hsv_threshold_hue, self.__hsv_threshold_saturation, self.__hsv_threshold_value)
+        self.__hsv_threshold_0_input = source0
+        (self.hsv_threshold_0_output) = self.__hsv_threshold(self.__hsv_threshold_0_input, self.__hsv_threshold_0_hue, self.__hsv_threshold_0_saturation, self.__hsv_threshold_0_value)
 
-        # Step CV_bitwise_not0:
-        self.__cv_bitwise_not_src1 = self.hsv_threshold_output
-        (self.cv_bitwise_not_output) = self.__cv_bitwise_not(self.__cv_bitwise_not_src1)
+        # Step HSV_Threshold1:
+        self.__hsv_threshold_1_input = source0
+        (self.hsv_threshold_1_output) = self.__hsv_threshold(self.__hsv_threshold_1_input, self.__hsv_threshold_1_hue, self.__hsv_threshold_1_saturation, self.__hsv_threshold_1_value)
+
+        # Step CV_bitwise_xor0:
+        self.__cv_bitwise_xor_src1 = self.hsv_threshold_0_output
+        self.__cv_bitwise_xor_src2 = self.hsv_threshold_1_output
+        (self.cv_bitwise_xor_output) = self.__cv_bitwise_xor(self.__cv_bitwise_xor_src1, self.__cv_bitwise_xor_src2)
+
+        # Step CV_medianBlur0:
+        self.__cv_medianblur_src = self.cv_bitwise_xor_output
+        (self.cv_medianblur_output) = self.__cv_medianblur(self.__cv_medianblur_src, self.__cv_medianblur_ksize)
+
+        # Step Find_Blobs0:
+        self.__find_blobs_input = self.cv_medianblur_output
+        (self.find_blobs_output) = self.__find_blobs(self.__find_blobs_input, self.__find_blobs_min_area, self.__find_blobs_circularity, self.__find_blobs_dark_blobs)
 
 
     @staticmethod
@@ -51,14 +84,51 @@ class GripPipeline:
         return cv2.inRange(out, (hue[0], sat[0], val[0]),  (hue[1], sat[1], val[1]))
 
     @staticmethod
-    def __cv_bitwise_not(src1):
-        """Computes the per element inverse of an image.
+    def __cv_bitwise_xor(src1, src2):
+        """Computes the per channel exclusive or of two images.
         Args:
             src1: A numpy.ndarray.
         Returns:
             The inverse of the numpy.ndarray.
         """
-        return cv2.bitwise_not(src1)
+        return cv2.bitwise_xor(src1, src2)
+
+    @staticmethod
+    def __cv_medianblur(src, k_size):
+        """Performs a median blur on the image.
+        Args:
+            src: A numpy.ndarray.
+            k_size: the scaling factor for the blur as a number.
+        Returns:
+            The result as a numpy.ndarray.
+        """
+        return cv2.medianBlur(src, (int)(k_size))
+
+    @staticmethod
+    def __find_blobs(input, min_area, circularity, dark_blobs):
+        """Detects groups of pixels in an image.
+        Args:
+            input: A numpy.ndarray.
+            min_area: The minimum blob size to be found.
+            circularity: The min and max circularity as a list of two numbers.
+            dark_blobs: A boolean. If true looks for black. Otherwise it looks for white.
+        Returns:
+            A list of KeyPoint.
+        """
+        params = cv2.SimpleBlobDetector_Params()
+        params.filterByColor = 1
+        params.blobColor = (0 if dark_blobs else 255)
+        params.minThreshold = 10
+        params.maxThreshold = 220
+        params.filterByArea = True
+        params.minArea = min_area
+        params.filterByCircularity = True
+        params.minCircularity = circularity[0]
+        params.maxCircularity = circularity[1]
+        params.filterByConvexity = False
+        params.filterByInertia = False
+        detector = cv2.SimpleBlobDetector_create(params)
+        return detector.detect(input)
 
 
 
