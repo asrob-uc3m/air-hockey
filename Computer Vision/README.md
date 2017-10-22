@@ -6,5 +6,6 @@ Uso de GRIP para programación algoritmos de visión por computador usando bloqu
 ![](2017-10-20.png)
 Figura 1. Filtro de rango
 
-![](2017-10-20(1).png)
+
+![](2017-10-20 (1).png)
 Figura 2. Prototipo
