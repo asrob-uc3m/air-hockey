@@ -1,4 +1,4 @@
-# Harware air-hockey
+# Hardware air-hockey
 
 Componentes de hardware, planos de proyecto, modelado 3D...
 
