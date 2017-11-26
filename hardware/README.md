@@ -2,6 +2,6 @@
 
 Componentes de hardware, planos de proyecto, modelado 3D...
 
-![Assembly](image1.jpg)
+![Assembly](assembly.jpg)
 
 Figura 1. Assembly
