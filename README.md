@@ -1,6 +1,6 @@
 # air-hockey
 Intelligent robotic air hockey game
 
-![Assembly](asssembly.jpg)
+![Assembly](assembly.jpg)
 
 Figura 1. Assembly
