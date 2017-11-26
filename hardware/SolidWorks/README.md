@@ -2,7 +2,7 @@
 
 En el siguiente directorio se pueden encontrar los componentes 3D, planos acotados y el Assembly realizados mediante SolidWorks.
 
-![Assembly](image1.jpg)
+![Assembly](assembly.jpg)
 
 Figura 1. Assembly
 
