@@ -1,22 +1,43 @@
 import cv2
+import numpy as np
 
 from grip import GripPipeline as GripPipeline
 
 
 def detect_closed_hand(src):
     closed_hand = None
-    # Get contours of hand mask
-    contours, _ = cv2.findContours(src.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    hand_contour = max(contours, key=cv2.contourArea)
+    try:
+        # Get contours of hand mask
+        contours, _ = cv2.findContours(src.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        skin_contour = max(contours, key=cv2.contourArea)
+        # I used to do a DP approximation here with epsilon = 1
+    except ValueError:
+        return None, None
 
-    # Find bounding box
-    hand_rect = cv2.boundingRect(hand_contour)  # Returns (x, y, w, h)
-    test_points = [(x, y) for x, y in zip(range(hand_rect[0], hand_rect[0]+hand_rect[2]),
-                                          range(hand_rect[1], hand_rect[1]+hand_rect[3]))]
-    center = max(test_points, key=lambda x: cv2.pointPolygonTest(hand_contour, x, measureDist=True))
-    dist = cv2.pointPolygonTest(hand_contour, center, measureDist=True)
-    print(center, dist)
-    closed_hand = center, dist
+    # Find maximum inscribed circumference (MIC)
+    skin_rect = cv2.boundingRect(skin_contour)  # Returns (x, y, w, h)
+    test_points = [(x, y) for x, y in zip(range(skin_rect[0], skin_rect[0]+skin_rect[2]),
+                                          range(skin_rect[1], skin_rect[1]+skin_rect[3]))]
+    mic_center = max(test_points, key=lambda x: cv2.pointPolygonTest(skin_contour, x, measureDist=True))
+    mic_radius = cv2.pointPolygonTest(skin_contour, mic_center, measureDist=True)
+    print("Min. Inscribed Circunf. -> c:{} r:{}".format(mic_center, mic_radius))
+
+    # Find minimum enclosing circumference
+    # Note: it is assumed that hand is usually within 3.5 times the radius of the MIC
+    # Note2: boundaries are checked to avoid using a ROI outside the image
+    hand_region = (max(mic_center[0]-3.5*mic_radius, 0),
+                   max(mic_center[1]-3.5*mic_radius, 0),
+                   2*3.5*mic_radius if mic_center[0]+2*3.5*mic_radius < src.shape[1] else src.shape[1]-1,
+                   2*3.5*mic_radius if mic_center[1]+2*3.5*mic_radius < src.shape[0] else src.shape[0]-1)
+    hand_contour = np.array(filter(lambda p: hand_region[0] <= p[0][0] <= hand_region[0]+hand_region[2] and hand_region[1] <= p[0][1] <= hand_region[1]+hand_region[3],
+                          skin_contour))
+    mec_center, mec_radius = cv2.minEnclosingCircle(hand_contour)
+
+    # Compare min and mec
+
+
+
+    closed_hand =    tuple([int(i) for i in mec_center]), mec_radius
 
     return closed_hand
 
