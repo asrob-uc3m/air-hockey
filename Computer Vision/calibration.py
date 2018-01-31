@@ -48,8 +48,8 @@ if __name__ == '__main__':
         _, new_image = webcam.read()
 
         # Find homography given the known dimensions of the air hockey
-        ah_markers_h = 50  # Distance between marker centers in the direction parallel to the goal line
-        ah_markers_w = 200  # Distance between marker centers in the direction perpendicular to the goal line
+        ah_markers_h = 150  # Distance between marker centers in the direction parallel to the goal line
+        ah_markers_w = 400  # Distance between marker centers in the direction perpendicular to the goal line
         ah_markers_points = [(0, 0), (ah_markers_w, 0), (0, ah_markers_h), (ah_markers_w, ah_markers_h)]
 
         if len(points) == len(ah_markers_points):
