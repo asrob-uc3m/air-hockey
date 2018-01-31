@@ -42,10 +42,10 @@ if __name__ == '__main__':
     print('Src image dimensions: {}'.format(new_image.shape))
 
     # Initialization of calibration points
-    p1 = (new_image.shape[1] / 3, new_image.shape[0] / 3)  # Green upper left
-    p2 = (2 * new_image.shape[1] / 3, new_image.shape[0] / 3)  # Blue upper right
-    p3 = (new_image.shape[1] / 3, 2 * new_image.shape[0] / 3)  # Red lower left
-    p4 = (2 * new_image.shape[1] / 3, 2 * new_image.shape[0] / 3)  # Black lower right
+    p1 = (new_image.shape[1] // 3, new_image.shape[0] // 3)  # Green upper left
+    p2 = (2 * new_image.shape[1] // 3, new_image.shape[0] // 3)  # Blue upper right
+    p3 = (new_image.shape[1] // 3, 2 * new_image.shape[0] // 3)  # Red lower left
+    p4 = (2 * new_image.shape[1] // 3, 2 * new_image.shape[0] // 3)  # Black lower right
     points.append(p1)
     points.append(p2)
     points.append(p3)
