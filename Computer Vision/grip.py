@@ -39,7 +39,7 @@ class GripPipeline:
         self.__find_blobs_circularity = [0.0, 1.0]
         self.__find_blobs_dark_blobs = False
 
-        self.find_blobs_output = None
+        self.output = None
 
 
     def process(self, source0):

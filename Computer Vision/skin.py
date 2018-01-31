@@ -1,7 +1,6 @@
 import cv2
 import numpy
 import math
-from enum import Enum
 
 class Skin:
     """
@@ -16,7 +15,7 @@ class Skin:
         self.__hsv_threshold_saturation = [25.22482014388489, 196.2542662116041]
         self.__hsv_threshold_value = [52.74280575539568, 144.0358361774744]
 
-        self.hsv_threshold_output = None
+        self.output = None
 
 
     def process(self, source0):
@@ -25,7 +24,8 @@ class Skin:
         """
         # Step HSV_Threshold0:
         self.__hsv_threshold_input = source0
-        (self.hsv_threshold_output) = self.__hsv_threshold(self.__hsv_threshold_input, self.__hsv_threshold_hue, self.__hsv_threshold_saturation, self.__hsv_threshold_value)
+        (self.output) = cv2.medianBlur(self.__hsv_threshold(self.__hsv_threshold_input, self.__hsv_threshold_hue, self.__hsv_threshold_saturation, self.__hsv_threshold_value),
+                                       3)
 
 
     @staticmethod

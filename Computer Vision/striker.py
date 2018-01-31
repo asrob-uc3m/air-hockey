@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-from grip import GripPipeline as GripPipeline
+from skin import Skin as GripPipeline
 
 
 def detect_closed_hand(src):
@@ -31,7 +31,10 @@ def detect_closed_hand(src):
                    2*3.5*mic_radius if mic_center[1]+2*3.5*mic_radius < src.shape[0] else src.shape[0]-1)
     hand_contour = np.array(filter(lambda p: hand_region[0] <= p[0][0] <= hand_region[0]+hand_region[2] and hand_region[1] <= p[0][1] <= hand_region[1]+hand_region[3],
                           skin_contour))
-    mec_center, mec_radius = cv2.minEnclosingCircle(hand_contour)
+    try:
+        mec_center, mec_radius = cv2.minEnclosingCircle(hand_contour)
+    except:
+        return None, None
 
     # Compare min and mec
 
@@ -53,10 +56,13 @@ if __name__ == '__main__':
     while True:
         _, new_image = webcam.read()
         grip.process(new_image)
-        center, radius = detect_closed_hand(grip.cv_medianblur_output)
-        cv2.circle(new_image, center, int(radius), (255, 0, 0))
+        center, radius = detect_closed_hand(grip.output)
+        try:
+            cv2.circle(new_image, center, int(radius), (255, 0, 0))
+        except TypeError:
+            print("No detection")
         cv2.imshow("Image", new_image)
-        cv2.imshow("Mask", grip.cv_medianblur_output)
+        cv2.imshow("Mask", grip.output)
         if cv2.waitKey(30)!=-1:
             break
 
