@@ -1,5 +1,11 @@
+import os
+
 import cv2
 import numpy as np
+
+from FakeCamera import FakeCamera
+
+debug = True
 
 
 class CallbackWrapper(object):
@@ -16,9 +22,13 @@ class CallbackWrapper(object):
 
             print(x, y)
 
+
 if __name__ == '__main__':
-    # Connect with webcam
-    webcam = cv2.VideoCapture()
+    if debug:
+        webcam = FakeCamera(os.path.abspath(os.path.expanduser("~/Pictures/asrob - air hockey/2017-10-31_20-48-59-129.png")))
+    else:
+        # Connect with webcam
+        webcam = cv2.VideoCapture()
     webcam.open(1)
 
     # Attach callback
@@ -29,6 +39,7 @@ if __name__ == '__main__':
 
     # Get first image from webcam (needed to get image dimensions)
     _, new_image = webcam.read()
+    print('Src image dimensions: {}'.format(new_image.shape))
 
     # Initialization of calibration points
     p1 = (new_image.shape[1] / 3, new_image.shape[0] / 3)  # Green upper left
