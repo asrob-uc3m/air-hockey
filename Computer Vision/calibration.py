@@ -8,6 +8,10 @@ from FakeCamera import FakeCamera
 from grip import GripPipeline
 pipeline = GripPipeline()
 
+from skin import Skin as SkinPipeline
+skin = SkinPipeline()
+from striker import detect_closed_hand
+
 debug = True
 
 
@@ -28,7 +32,7 @@ class CallbackWrapper(object):
 
 if __name__ == '__main__':
     if debug:
-        webcam = FakeCamera(os.path.abspath(os.path.expanduser("~/Pictures/asrob - air hockey/2017-10-31_20-49-27-866.png")))
+        webcam = FakeCamera(os.path.abspath(os.path.expanduser("~/Pictures/asrob - air hockey/2017-10-31_20-48-07-653.png")))
     else:
         # Connect with webcam
         webcam = cv2.VideoCapture()
@@ -83,11 +87,12 @@ if __name__ == '__main__':
 
         # Here I detect the puck
         pipeline.process(image_corrected) # To be substituted by proper code
-        wtf, contours, hierarchy = cv2.findContours(pipeline.cv_medianblur_output.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # I still don't believe that this returns 3 things, so I'll keep this as a warning
+        #wtf,
+        contours, hierarchy = cv2.findContours(pipeline.cv_medianblur_output.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # I still don't believe that this returns 3 things, so I'll keep this as a warning
 
         try:
             filtered_contours = filter(lambda x: cv2.contourArea(x) > 40, contours)
-            puck_contour =  sorted(filtered_contours, key= lambda x: cv2.contourArea(x))[0]
+            puck_contour = sorted(filtered_contours, key= lambda x: cv2.contourArea(x))[0]
             (puck_x, puck_y), puck_radius = cv2.minEnclosingCircle(puck_contour)
 
             cv2.circle(image_corrected, (int(puck_x), int(puck_y)), int(puck_radius), (255, 255, 0), 2)
@@ -96,5 +101,14 @@ if __name__ == '__main__':
             print(e)
         cv2.imshow("Output", pipeline.cv_medianblur_output)
 
-       
+        #  Hand processing
+        skin.process(image_corrected)
+        center, radius = detect_closed_hand(skin.output)
+        try:
+            cv2.circle(new_image, center, int(radius), (255, 0, 0))
+        except TypeError:
+            print("No detection")
+        cv2.imshow("Hand_mask", skin.output)
+
+
     cv2.destroyAllWindows()

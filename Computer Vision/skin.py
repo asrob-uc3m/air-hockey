@@ -11,9 +11,19 @@ class Skin:
         """initializes all values to presets or None if need to be set
         """
 
+        """
         self.__hsv_threshold_hue = [0.0, 55.59726962457334]
         self.__hsv_threshold_saturation = [25.22482014388489, 196.2542662116041]
         self.__hsv_threshold_value = [52.74280575539568, 144.0358361774744]
+        """
+
+        self.__hsv_threshold_hue_white = [0, 180]
+        self.__hsv_threshold_saturation_white = [0, 50]
+        self.__hsv_threshold_value_white = [120, 255]
+
+        self.__hsv_threshold_hue_blue = [60, 130]
+        self.__hsv_threshold_saturation_blue = [20, 255]
+        self.__hsv_threshold_value_blue = [40, 255]
 
         self.output = None
 
@@ -24,9 +34,17 @@ class Skin:
         """
         # Step HSV_Threshold0:
         self.__hsv_threshold_input = source0
-        (self.output) = cv2.medianBlur(self.__hsv_threshold(self.__hsv_threshold_input, self.__hsv_threshold_hue, self.__hsv_threshold_saturation, self.__hsv_threshold_value),
-                                       3)
+        self.output_white = self.__hsv_threshold(self.__hsv_threshold_input, self.__hsv_threshold_hue_white,
+                                                                             self.__hsv_threshold_saturation_white,
+                                                                             self.__hsv_threshold_value_white)
+        self.output_blue = self.__hsv_threshold(self.__hsv_threshold_input, self.__hsv_threshold_hue_blue,
+                                                                            self.__hsv_threshold_saturation_blue,
+                                                                            self.__hsv_threshold_value_blue)
 
+        self.output_all = cv2.bitwise_or(self.output_white, self.output_blue)
+
+        (self.output) = cv2.medianBlur(self.output_all, 3)
+        # self.__hsv_threshold(self.__hsv_threshold_input, self.__hsv_threshold_hue, self.__hsv_threshold_saturation, self.__hsv_threshold_value)
 
     @staticmethod
     def __hsv_threshold(input, hue, sat, val):
